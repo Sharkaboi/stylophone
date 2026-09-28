@@ -15,10 +15,11 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-/* Pot wiper -> J2.1 = P0_29 = ADC0_B21, i.e. channel 21 on the B side.
- * The driver default is side A, so sampleChannelMode must be set. */
 #define APP_ADC_CHANNEL 21U
 #define APP_ADC_CMDID   1U
+#define APP_NO_KEY_MAX  150U
+#define APP_NO_KEY      (-1)
+#define APP_DEBOUNCE    3U
 
 /*******************************************************************************
  * Prototypes
@@ -27,10 +28,37 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+static const uint16_t kKeyAdc[] = {315U,  604U,  877U,  1138U, 1401U, 1675U, 1955U,
+                                   2250U, 2553U, 2892U, 3277U, 3714U, 4095U};
+static const char *const kKeyNote[] = {"C4", "C#4", "D4", "D#4", "E4",  "F4", "F#4",
+                                       "G4", "G#4", "A4", "A#4", "B4",  "C5"};
+#define APP_KEY_COUNT (sizeof(kKeyAdc) / sizeof(kKeyAdc[0]))
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
+static int app_classify(uint32_t adc)
+{
+    uint32_t bestDist = 0xFFFFFFFFU;
+    uint32_t d, i;
+    int best = APP_NO_KEY;
+
+    if (adc <= APP_NO_KEY_MAX)
+    {
+        return APP_NO_KEY;
+    }
+    for (i = 0U; i < APP_KEY_COUNT; i++)
+    {
+        d = (adc > kKeyAdc[i]) ? (adc - kKeyAdc[i]) : (kKeyAdc[i] - adc);
+        if (d < bestDist)
+        {
+            bestDist = d;
+            best     = (int)i;
+        }
+    }
+    return best;
+}
+
 /*!
  * @brief Main function
  */
@@ -40,18 +68,21 @@ int main(void)
     lpadc_conv_command_config_t cmd;
     lpadc_conv_trigger_config_t trig;
     lpadc_conv_result_t result;
+    int reported   = APP_NO_KEY;
+    int candidate  = APP_NO_KEY;
+    uint32_t agree = 0U;
+    int key;
 
     /* Init board hardware. */
     BOARD_InitHardware();
 
-    /* ADC0 and its voltage reference both boot powered down. */
     CLOCK_SetClkDiv(kCLOCK_DivAdc0Clk, 1u);
     CLOCK_AttachClk(kFRO_HF_to_ADC0);
     SPC0->ACTIVE_CFG1 |= 0x1U;
 
     PRINTF("MCUX SDK version: %s\r\n", MCUXSDK_VERSION_FULL_STR);
 
-    PRINTF("hello world.\r\n");
+    PRINTF("13-key ladder on J2.1 - C4 to C5\r\n");
 
     LPADC_GetDefaultConfig(&adcConfig);
     adcConfig.enableAnalogPreliminary = true;
@@ -78,7 +109,24 @@ int main(void)
         while (!LPADC_GetConvResult(ADC0, &result, 0U))
         {
         }
-        PRINTF("ADC = %u\r\n", (unsigned)(result.convValue >> 3));
-        SDK_DelayAtLeastUs(200000, SystemCoreClock);
+        key = app_classify(result.convValue >> 3);
+
+        if (key != candidate)
+        {
+            candidate = key;
+            agree     = 0U;
+        }
+        else if (agree < APP_DEBOUNCE)
+        {
+            agree++;
+        }
+
+        if ((agree >= APP_DEBOUNCE) && (candidate != reported))
+        {
+            reported = candidate;
+            PRINTF("%s\r\n", (reported == APP_NO_KEY) ? "--" : kKeyNote[reported]);
+        }
+
+        SDK_DelayAtLeastUs(10000, SystemCoreClock);
     }
 }
