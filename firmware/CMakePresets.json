@@ -13,8 +13,8 @@
       "inherits": "debug-env",
       "cacheVariables": {
         "APP_DIR": {
-          "type": "PATH",
-          "value": "${fileDir}"
+          "value": "${fileDir}",
+          "type": "PATH"
         },
         "CMAKE_BUILD_TYPE": "debug",
         "SdkRootDirPath": "$env{SdkRootDirPath}/mcuxsdk",
@@ -36,8 +36,8 @@
       "inherits": "release-env",
       "cacheVariables": {
         "APP_DIR": {
-          "type": "PATH",
-          "value": "${fileDir}"
+          "value": "${fileDir}",
+          "type": "PATH"
         },
         "CMAKE_BUILD_TYPE": "release",
         "SdkRootDirPath": "$env{SdkRootDirPath}/mcuxsdk",

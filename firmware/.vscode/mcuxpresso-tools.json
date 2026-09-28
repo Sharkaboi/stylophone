@@ -7,8 +7,8 @@
   "projectType": "sdk-v2-freestanding",
   "projectName": "firmware",
   "sdk": {
-    "version": "26.6.0",
     "path": "z:\\frdm_mcxn236\\frdm_mcxn236",
+    "version": "26.6.0",
     "boardId": "frdmmcxn236",
     "deviceId": "MCXN236",
     "coreId": "cm33_core0"
