@@ -1,0 +1,22 @@
+# Repo-wide ignores.
+# Firmware build output (debug/, release/, the __repo__ SDK junction, CMake and
+# C artifacts) is handled by firmware/.gitignore, next to the project it covers.
+
+# Safety net: firmware images anywhere outside firmware/.
+# If you ever need to commit one, un-ignore it explicitly, e.g. !samples/kit.bin
+*.elf
+*.axf
+*.bin
+*.hex
+*.srec
+*.s19
+*.map
+
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editor noise
+*.swp
+*~
