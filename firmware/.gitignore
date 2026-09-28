@@ -1,0 +1,68 @@
+# MCUXpresso SDK (west) project — FRDM-MCXN236
+# This directory IS the CMake project (flat layout, no nested project folder).
+# Based on github/gitignore C.gitignore + CMake.gitignore, plus MCUXpresso specifics.
+
+# ---------------------------------------------------------------------------
+# MCUXpresso specifics
+# ---------------------------------------------------------------------------
+
+# __repo__ is a Windows JUNCTION to the SDK west workspace
+# (z:\frdm_mcxn236\frdm_mcxn236). Git follows junctions like real directories,
+# so without this it swallows ~64,000 files / 1.3 GB of SDK.
+__repo__/
+
+# Build output. CMakePresets.json sets binaryDir to ${fileDir}/${presetName},
+# so builds land in ./debug and ./release.
+debug/
+release/
+Debug/
+Release/
+build/
+
+# ---------------------------------------------------------------------------
+# CMake
+# ---------------------------------------------------------------------------
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# Machine-local preset overrides (the portable half stays in CMakePresets.json)
+CMakeUserPresets.json
+
+# ---------------------------------------------------------------------------
+# C / firmware build artifacts
+# ---------------------------------------------------------------------------
+*.o
+*.obj
+*.d
+*.a
+*.lib
+*.su
+*.dwo
+*.gch
+*.pch
+
+# Linker + image output
+*.elf
+*.axf
+*.hex
+*.bin
+*.srec
+*.s19
+*.map
+*.lst
+
+# ---------------------------------------------------------------------------
+# OS noise
+# ---------------------------------------------------------------------------
+Thumbs.db
+desktop.ini
+.DS_Store
