@@ -213,3 +213,17 @@ air has time to get round. At 0.4 mW the cone visibly moved at 262 Hz but was ba
 audible. Ears are also less sensitive at low frequencies. Fixes: a baffle or sealed box (the
 enclosure), more power, or higher notes.
 Power check: P = V² / R. 0.22 V rms into 8 Ω ≈ 6 mW, already a clear tone close up.
+
+## 27. Digital activity heard as crackle
+Every OLED update is a 1 KB I2C burst. The burst draws pulses of current, and those
+pulses flow through the same ground wires as the audio. The ground under the DAC shifts by
+millivolts, the amp boosts that ~16×, and you hear a crackle at the screen's update rate.
+- Found by an A/B test: stop the 4×-per-second redraw and the crackle was 99 % gone.
+  First the firmware was cleared: 0 audio buffer underruns.
+- **Firmware fix:** redraw only when something changes.
+- **Hardware fixes** (needed once the screen animates while you play):
+  - separate ground runs for the audio and digital parts, meeting at one star point
+  - a 100 nF capacitor plus 10–100 µF next to each module's supply pins, so the burst's
+    current comes from the capacitor instead of the long wires
+  - short wires on perfboard
+Rule: when noise has a rhythm, find what in the system has the same rhythm.

@@ -178,6 +178,8 @@ Buttons and encoder: switch to GND, internal pull-up, no resistors.
 ## Firmware shape
 - Setup once, then `while (1) { read inputs → decide → update outputs }`.
 - Audio is the exception: samples are produced in the SAI interrupt, never in the loop.
+- Screen updates are an audio noise source (I2C current bursts through shared ground,
+  LEARNING #27). Redraw only on change until the perfboard has star ground + decoupling.
   The loop never blocks longer than the audio buffer (OLED and SD in chunks).
 - I2S format mismatch is the classic "no sound" trap (I2S, 16-bit, stereo).
 - Debounce buttons and keys.
