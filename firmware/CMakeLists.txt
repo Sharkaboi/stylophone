@@ -20,7 +20,11 @@ mcux_add_source(
     SOURCES main.c
             adc/adc.c
             keys/keys.c
+            i2c/i2c.c
+            oled/oled.c
 )
+# Give up on a stuck I2C bus (bad wiring) instead of waiting forever.
+mcux_add_configuration(CC "-DI2C_RETRY_TIMES=10000U")
 mcux_convert_binary(BINARY ${APPLICATION_BINARY_DIR}/${MCUX_SDK_PROJECT_NAME}.bin)
 mcux_add_config_mex_path( PATH ${board} )
 mcux_add_include(INCLUDES .)
