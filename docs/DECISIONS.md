@@ -1,142 +1,142 @@
 # Decisions
 
-Every open choice in one place. ★ = recommendation, with the reason.
-Answer like "accept all ★" or "D3 = b, rest ★". Settled answers move into `CLAUDE.md`.
+Settled choices, each with its reason. To change one, edit it here and in `CLAUDE.md`.
+Things that need your hands are at the bottom.
 
-## Physical checks (only you can do these)
-
-| # | Check | How | Why it matters |
-|---|---|---|---|
-| P1 | Parts on hand | Fill the Status column below | Decides what we can build next |
-| P2 | Ladder voltages + pull-down | Multimeter DC-V, black on GND, red on each tap: expect k × 0.254 V (K1 0.25 … K13 3.30). Then Ω mode on the pull-down alone (out of circuit): expect ~100 kΩ (brown-black-yellow) | Proves the hardware before blaming code; explains the mid-ladder sag |
-| P3 | PJ311 jack pin count | 3 pins = plain, 5 pins = has switch contacts | Decides speaker auto-mute (D9) |
-| P4 | DAC module's own 3.5 mm jack | Is there one on the CJMCU-1334 board? | Simplest headphone output |
-| P5 | OLED pin order + address | Read silkscreen: `VCC GND SCL SDA` or `GND VCC …`; address jumper 0x3C/0x78 | Swapped VCC/GND kills it instantly |
-| P6 | Module header pins | Do DAC / OLED / MPR121 / encoder come with loose (unsoldered) pins? | Loose pins don't make contact on a breadboard |
-| P7 | Soldering kit | Iron, solder, flux, wick? Not in the BOM | Needed for module pins, stylus, perfboard |
-
-### P1 — parts status (fill in: ✅ tested · 📦 have, untested · ❌ missing)
-
-| Part | Status |
-|---|---|
-| FRDM-MCXN236 + USB-C cable | ✅ |
-| UDA1334A DAC (CJMCU-1334) | |
-| PAM8403 amp | |
-| 8 Ω 1 W speaker | |
-| PJ311 3.5 mm jacks ×3 | |
-| SSD1306 0.96" OLED (I2C) | |
-| MPR121 touch board | |
-| Mini micro-SD module + cards | |
-| Tactile buttons ×10 | |
-| KY-040 encoder | |
-| 10 kΩ pots ×4 + knobs | |
-| SPDT toggle | |
-| 1 kΩ 1 % ×13 ladder (on breadboard?) | |
-| 100 kΩ + 220 Ω resistors | |
-| FR4 copper clad (keys cut?) | |
-| Teflon 20 AWG wire + brass stylus tip | |
-| Breadboard + jumper wires | |
-| Perfboard ×2, headers, standoffs | |
-| Multimeter | |
-| Power bank | |
-| 3D printer | ✅ |
-| Soldering kit | |
+## Scope
+- **In:** 13-key stylus keyboard, synth tones, microSD samples (an extra), OLED with
+  menu + GIF screensaver, 4 knobs, encoder, 5 buttons, speaker + headphones.
+- **Out:** soundpad (MPR121), record/loop, presets. Aux-in stays optional hardware (v4).
+- **Reference instrument:** the original Stylophone has a buzzy square-wave tone, a
+  tuning knob, a vibrato switch and a power switch, nothing else. The modern GEN X-1 adds
+  sub-oscillator, filter, envelope, LFO and delay. We sit between the two.
 
 ## Software
 
-**D1 — Language.** ★ **C on the board, Python on the PC.** The audio interrupt must
-produce a sample every 31 µs and never miss. MicroPython runs tens of times slower than C,
-and this chip has no mainstream MicroPython/Arduino support. Kotlin has no bare-metal
-target. Python fits the PC side well: sample converter, key-template generator,
-serial plotter.
+**D1 Language: C on the board, nothing on a PC.** The gadget is standalone: power it and
+play. A PC is only used to write and flash the firmware, and to design the printed parts.
+No Python tools are planned.
 
-**D2 — Where samples live.**
-- a) ★ **Built into flash.** A Python tool turns any WAV into a C array and you
-  re-flash to change kits. About 900 KB free ≈ 14 s of audio at 32 kHz. No SD wiring,
-  no SPI or filesystem code, and it avoids the FC3/MCU-Link conflict.
-- b) microSD: load the chosen kit into RAM at boot. Swap sounds without a PC, but
-  RAM limits you to ~2 s. Needs SPI + FatFs + an SD-over-SPI driver that is *not*
-  in the installed SDK (about 150 lines to write or fetch).
-- c) microSD copied into the 8 MB QSPI flash: most capacity, most code.
+**D2 Samples: microSD, optional.** No card, no samples on it, or the card pulled out
+while playing → synth tones, automatically.
+```
+SD card (FAT32)
+└── STYLO/
+    ├── SAMPLES/
+    │   └── <bank name>/      one folder = one bank; the Sound button cycles banks
+    │       ├── 01.WAV … 13.WAV   one clip per key, each at its own speed (soundboard)
+    │       └── any.WAV           or a single file, pitched across the 13 keys
+    └── SCREENSAVER/
+        └── *.GIF             looped, shrunk to 128×64 black & white
+```
+- WAV: PCM 8/16-bit, mono or stereo, any sample rate, any length. Clips are streamed from
+  the card rather than loaded into RAM, so length is unlimited.
+- The SD-over-SPI driver isn't in the installed SDK: about 150 lines to write, or fetch
+  NXP's `sdmmc` component. Decided at v3.
 
-Option a) first; b) can be added later as its own stage without changing anything else.
+**D3 Sample rate: 32 kHz, 16-bit.** The original is analog, so it has no sample rate to
+copy. 32 kHz reproduces up to 16 kHz, beyond what the speaker or most ears use. WAVs at
+44.1/48 kHz are converted while being pitched, which happens anyway.
 
-**D3 — Sample rate.** ★ **32 kHz, 16-bit.** Sound up to 16 kHz (half the rate) is
-plenty for this instrument. It uses a third less RAM and CPU than 48 kHz, and the
-DAC's PLL locks to anything from 16 to 100 kHz. Alternative: 48 kHz.
+**D4 Feeding the DAC: render in the SAI interrupt, no DMA.** Measured budget:
 
-**D4 — Feeding the DAC.** ★ **Render samples inside the SAI FIFO interrupt.** It is the
-shortest code, and 150 MHz gives ~4,700 CPU cycles per sample. DMA is the
-alternative: more setup code, needed only if the CPU gets tight.
+| Load | Cost |
+|---|---|
+| CPU time per sample at 32 kHz | 4,687 cycles available |
+| Synth: 2 voices + filter + vibrato + echo (hardware float) | ~150 cycles ≈ 3 % |
+| SAI interrupt overhead (8,000 per second, 4 frames each) | ~1 % |
+| SD streaming, 64–400 KB/s over SPI (~1.5 MB/s) | ≤ ~30 % of the SPI bus, main loop |
+| OLED frame, 1 KB over I2C at 400 kHz | ~23 ms → GIF at 15 fps uses ~35 % of the bus |
 
-**D5 — Voices.** ★ **1 stylus voice + 7 pad voices; a new pad hit takes the oldest.**
-One stylus can only touch one key, so the keyboard is monophonic by physics.
+Rule: the main loop must never stall longer than the audio buffer (~64 ms), so the OLED
+is sent in chunks.
 
-**D6 — Synth engine (v3).** ★ Oscillator: sine / triangle / saw / square / sample,
-plus a sub-oscillator one octave down → attack–release envelope (2 menu settings
-instead of ADSR's 4) → 2-pole state-variable low-pass filter (cutoff pot, resonance in menu)
-→ echo delay (time + mix in menu) → volume pot. The LFO bends pitch for vibrato
-(depth pot, rate in menu). Each block is roughly 5 lines of maths.
+**D5 Voices: 2 for the stylus.** The note being touched, plus the previous one fading
+out, so release and echo tails overlap. The stylus can touch one key at a time.
 
-**D7 — Tuning pot.** ★ **Fine tune ±1 semitone** (matches other instruments by ear).
-Octave buttons and a menu transpose cover big jumps. Alternative: ±12 semitones.
+**D6 Synth engine:**
+- Waveforms: square (classic, default), saw, triangle, sine.
+- Sub-oscillator one octave down.
+- Attack/release envelope.
+- Low-pass filter: cutoff on a knob, resonance in the menu.
+- Vibrato: depth on a knob, speed in the menu.
+- Echo: time and mix in the menu.
 
-**D8 — Record / loop (v4).** ★ **Record note events** (time, note, on/off), not audio.
-A minute of playing takes about 2 KB, overdub is free, and playback goes through the
-current sound. Recording audio would fill RAM in ~3 s.
+**D7 Tuning knob = the original's tuning knob.** Shifts every note by up to ±1 semitone
+to match another instrument or a song. Centre = standard pitch (A4 = 440 Hz).
 
-**D9 — Presets.** ★ **8 slots in the last sector of internal flash.** Uses the SDK
-flash API with no extra hardware. Alternative: a file on SD (only if D2 = b/c).
+**D8 Record/loop: dropped.** Record outside the gadget and put clips on the SD card.
 
-**D10 — Soundpad (v4).** ★ **8 pads that play one-shot drum samples** (kick, snare,
-hat, clap, …), made from copper tape or FR4 squares under a thin printed lid. The
-MPR121's other 4 inputs stay spare.
+**D9 Presets: dropped.** The original has none. Menu settings reset at power-on; saving
+them to the SD card can come later.
 
-**D11 — Controls.** ★ Buttons: octave −, octave +, mode (synth ↔ sampler), preset
-(tap = next, hold = save), record (tap = record/stop, hold = clear). Encoder: turn to
-pick a parameter, push to edit it, turn to change the value.
+**D10 Soundpad: dropped.** The MPR121 is spare for a future project.
 
-**D12 — RGB LED.** ★ **7 on/off colours, one per note name (C, D, E …), shared by
-sharps.** No timers needed. Alternative: PWM for 12 distinct hues.
+**D11 Controls:**
 
-**D13 — OLED.** ★ **Our own tiny SSD1306 driver** (init list + 1 KB screen buffer +
-5×7 font, ~80 lines). The SDK's LVGL is a full GUI framework and overkill here.
+| Control | Does |
+|---|---|
+| Volume knob | Loudness. Firmware caps the maximum to protect IEMs |
+| Tuning knob | ±1 semitone fine tune |
+| Cutoff knob | Brightness (low-pass filter) |
+| Vibrato knob | Vibrato depth; fully down = off |
+| Octave − / + | Shift all keys an octave, ±2 octaves |
+| Mode | Synth tones ↔ SD samples |
+| Sound | Next waveform (tones) or next bank (samples) |
+| Screen | Screensaver on/off |
+| Encoder | Turn = choose setting · push = edit · turn = change |
+| Toggle switch | Speaker on/off (hardware) |
 
-**D14 — Code layout.** ★ One firmware project with one file per job: `main.c`
-(loop), `keys.c`, `knobs.c`, `buttons.c`, `audio.c` (SAI + interrupt), `synth.c`,
-`oled.c`, `ui.c`, `pads.c`, `store.c`. PC tools go in `tools/`.
+**D12 RGB LED: 7 on/off colours, one per note letter;** sharps share their letter's colour.
+
+**D13 OLED: our own small driver and drawing code.** Text, lines and bitmaps, so anything
+can be drawn. Screensaver: GIFs from the SD card, decoded on the board with a small
+open-source decoder (AnimatedGIF, Apache-2.0) kept in `firmware/lib/`. Without a card it
+falls back to a built-in screensaver: a live oscilloscope of the sound. The Screen button
+toggles it. Otherwise the display shows the note and the menu.
+
+**D14 Code layout:** one firmware project, one folder per feature.
 
 ## Hardware
 
-**D15 — Toggle switch.** ★ **Speaker on/off**, wired into the PAM8403's 5 V feed: it
-silences the speaker and kills amp hiss on headphones. Vibrato needs no switch,
-because LFO depth at zero means off. Saves a GPIO. Alternative: vibrato on/off.
+**D15 Toggle = speaker on/off,** in series with the speaker wire. The amp stays
+powered, because an unpowered amp fed a signal can distort the headphones. An *LFO* (low-frequency
+oscillator) is a slow wave, about 5–7 times a second, that wobbles the pitch: that's
+vibrato. The vibrato knob sets how much wobble, and fully down is off. It applies to
+tones and samples alike, so no switch is needed.
 
-**D16 — Headphone output.** ★ **Use the DAC's own jack; try it without the 220 Ω
-first.** The UDA1334A is a line output, designed for loads of thousands of ohms.
-Headphones are 16–32 Ω, so it may be quiet, and a 220 Ω series resistor makes it
-~8× quieter still with 32 Ω headphones (voltage divider: 32 / (220 + 32)). Test at v1c. If it's too quiet, add a headphone amp chip (not
-in the BOM).
+**D16 Headphones: the DAC's own jack.** It is wired straight to the DAC outputs, so
+there's no place for the 220 Ω; IEMs are protected by the firmware volume cap. Test
+loudness at v1c. If too quiet, add a real headphone amp module later.
+**Never drive headphones from a PAM8403.**
+- Its two outputs per channel are both driven (bridge-tied), and a headphone jack joins
+  L and R at one shared sleeve, which shorts them.
+- Each output sits at 2.5 V DC and switches at ~250 kHz. That DC would flow through the
+  earpieces.
 
-**D17 — Speaker auto-mute.** ★ **Manual, via the D15 toggle.** Auto-mute needs a
-switched jack (P3), which the BOM doubts you have.
+**D17 Speaker mute: manual,** with the toggle. The DAC jack's switch contact could
+auto-mute later.
 
-**D18 — Key template + enclosure.** ★ **Generate both from code**: Python → 1:1 SVG
-key template, OpenSCAD (a programming language for 3D models) → enclosure STL.
-Version-controlled, parametric, fits how you work.
+**D18 Keys + enclosure in OpenSCAD** (a programming language for 3D models). The
+nickel strip already comes at key width (8 mm), so no paper template is needed: cut
+13 × 50 mm pieces and drop them into printed pockets.
 
 ## Repo
 
-**D19 — `nxp-docs/` (≈25 MB of NXP PDFs + design files) is already public.**
-★ Stop tracking it from now on (keep local copies, link NXP's download pages in the
-docs). Optional: purge it from history, which needs a force-push and can't be undone
-on GitHub. NXP owns those files. Alternative: leave as is.
+**D19** Purge `nxp-docs/` from history, force-push, ignore it, and link NXP's pages.
+**D20** Ignore `firmware/mcux_include.json` and `firmware/.vscode/mcuxpresso-tools.json`
+(machine paths). The README documents how to recreate them.
+**D21** Rewrite history without the Claude co-author line, and force-push.
 
-**D20 — Machine paths in tracked files.** `firmware/mcux_include.json` and
-`.vscode/mcuxpresso-tools.json` hold `C:/Users/sarat/...` and `z:\frdm_mcxn236`. The
-extension needs them. ★ Keep them tracked: low sensitivity, and the build breaks
-without them. Alternative: ignore them and document the setup.
+## Needs your hands
 
-**D21 — Claude attribution in pushed history.** Commit `8d9318f` (already pushed)
-ends with a `Co-Authored-By: Claude` line. ★ Leave it: removing it needs a
-force-push. New commits carry no attribution.
+| # | Check | How |
+|---|---|---|
+| H1 | Old PAM8403 alive? | Unpowered, Ω between its 5 V and GND pins: ~0 Ω and staying there = dead; starting low and climbing = fine (capacitors charging) |
+| H2 | Nickel strip really nickel? | Cut a piece, leave the fresh edge in salt water overnight: rust = steel core, return it |
+| H3 | FRDM mounting holes | Test-fit an M3 screw (likely 3.2 mm holes) |
+| H4 | New OLED pin order | Read the silkscreen before wiring: `VCC GND SCL SDA` or `GND VCC SCL SDA` |
+| H5 | Soldering iron | Was the Tomson 90 W digital bought? The old 25 W kit iron can't do the nickel keys |
+| H6 | ADC table conditions | Was the 100 kΩ pull-down in place when the 13 ADC values were recorded? |
+| H7 | Stylus tip | Do you have the brass screw/rod yet? |
+| H8 | Power switch | None planned: power = power bank button or unplug. OK? |

@@ -1,30 +1,39 @@
-#,Item,Exact title (SKU),Qty,Store (CONFIRM),~Price INR,Stage,Notes
-1,DAC line-out,CJMCU-1334 UDA1334A I2S DAC Audio Stereo Decoder Module (R175135),1,Robu?,369,v1,"In from v1 now; monitor via its 3.5mm line-out/headphones. VIN=5V, 3.3V I2S ok"
-2,Amp,PAM8403 Digital Power Amplifier,1,Robocraze?,29,v2,Use one channel; power from 5V
-3,Speaker,1W Speaker - 8 Ohm (Large),1,Quartz?,50,v2,Upgrade: 3W 4ohm + sealed printed chamber
-4,3.5mm jacks,"Audio Jack PJ311-3.5mm Female Black (1883447) x3",3,Robu?,39,v4,"3x PJ311 (Rs13 ea): 1 headphone (needs break-contact for auto-mute; toggle fallback), 1 aux-in, 1 stylus. PCB-mount: mount on perfboard scrap or printed pocket. Skip the Rs159 plain 3-pin pack."
-5,OLED,"0.96"" SSD1306 OLED Module I2C (R179503)",1,Robocraze?,93,v1,4-pin I2C; addr 0x3C
-6,Touch,MPR121 V12 Capacitive Touch Sensor I2C (815857),1,Robu?,96,v4,POWER 3.3V ONLY (max 3.6V); addr 0x5A
-7,SD module,Mini Micro SD Card Reader Module (699588),1,Robu?,25,v2,3.3V MINI one; NOT the Rs35 5V level-shifted
-8,Buttons,DIP Momentary Tactile Switch 6x6x5mm 4-Pin - 10 pcs,1,Robocraze?,16,v1,Need 5
-9,Encoder,KY-040 Rotary Encoder Module,1,Robocraze/Quartz?,47,v1,Or EC11-with-knob Rs93
-10,Pots x4,10K Potentiometer with Knob,4,Robocraze?,136,v3,Rs34 x4. Wire across 3.3V. Linear.
-11,Toggle,On-Off Toggle Switch 3-Pin 2-Way SPDT,1,Quartz?,18,v3,OPTIONAL (vibrato / speaker-mute)
-12,Ladder resistors,"1k Metal Film 1% - Yageo MFR-12FTF52-1K (R203195) x15",15,Robu,15,v1,"In stock. 1%, miniature body (3.4mm). 5-band: brown-black-black-brown-brown. 13 + 2 spares."
-13,Ladder pull-down + HP resistors,"100K Ohm Resistor 10pcs (Rs13) + 220 Ohm Resistor 10pcs (Rs9)",2,Robocraze?,22,v1,"100k x1 = ladder pull-down; 220R x2 = headphone series. Carbon film 5% is fine for these two."
-14,Keys (copper-clad),FR4 Copper Clad Laminate PCB Single-Sided (470853),1,Robu?,42,v1,Cut 13 key gaps. Brass strip dropped (may revisit)
-15,Stylus cable,Teflon High Temperature Wire 20AWG Stranded (R257337),1,Robu?,37,v1,Per metre; mono (1 conductor)
-16,Stylus tip,Brass screw / small brass rod,1,local,5,v1,File round + smooth; solder to Teflon wire
-17,Breadboard,MB102 Solderless Breadboard 830 Points (24438),1,Robu?,63,v1,Reusable
-18,Jumpers,Jumper Wire Set (M2M M2F F2F) 120 pcs,1,Robocraze?,139,v1,Reusable
-19,Perfboard x2,Universal PCB Prototype Board Double-Sided 7x9cm (44231),2,Robu?,98,v4,Rs49 each
-20,Header pins,Straight Male + Female Header Pins 40-Pin (Berg),1,Quartz?,17,v4,
-21,Standoffs,M3 F-F Nylon Hex Standoff + M3 Nylon Screw set,1,Quartz?,30,v4,Check board hole size (may be M2)
-22,Multimeter (tool),Digital Multimeter (continuity + DC-V + ohms),1,confirm,300,v1,Essential for cutting keys + ladder + power checks
-,,,,,,,
-,BUZZER,DROPPED,-,-,0,-,Monitor via DAC line-out instead
-,POWER,Power bank (owned),1,-,0,-,Only power source
-,,,,,,,
-,ALREADY HAVE,FRDM-MCXN236 / USB-C cable / SD cards 4-32GB / 3D printer / old 3.5mm cable to splice,-,-,0,-,
-,,,,,,,
-,PARTS SUBTOTAL (through v4; power bank),,,,~1400,,Plus multimeter ~300 = ~1700 with the meter
+Item,Detail,Qty,Status,Stage,Notes
+FRDM-MCXN236 board + USB-C cable,Rev C,1,tested,all,Power + flash via J10
+UDA1334A I2S DAC,WCMCU-1334 (Robu R175135),1,have - pins soldered,v1c,VIN 5 V; onboard switched 3.5 mm jack = headphone out
+PAM8403 amp,Plain board without pot,~3,have - 1 suspect,v4,One may be heat-damaged (check H1). Speaker between L+ and L- only. Never for headphones
+Speaker,8 ohm 0.5-1 W,1,have - tabs unsoldered,v4,
+OLED 0.96in SSD1306 module,4-pin I2C (Quartz),1,have - pins soldered,v1b,3.3 V; check VCC/GND order (H4); address 0x3C (alt 0x3D)
+OLED bare panel,QG-2864KSWEG01 (Robu R179503),1,unusable,-,Needs its own PCB; return or keep for a first-PCB project
+MPR121 touch board,Robu 815857,1,spare - pins soldered,-,Soundpad dropped
+Mini micro-SD module,3.3 V version (Robu 699588),1,have - pins soldered,v3,Shares SPI pins with the MCU-Link bridge
+microSD cards,4 GB + 32 GB,2,have,v3,FAT32 (force FAT32 on the 32 GB)
+Tactile buttons,12x12x8 mm 4-pin,pack,have,v1d,Use two diagonal pins
+Rotary encoder,KY-040,1,have,v2,Run at 3.3 V
+Pots,WH148 B10K linear + knobs,4,1 tested,v1d,Middle lug = wiper; swap outer lugs to reverse direction
+Toggle switch,SPDT,1,have,v4,Speaker on/off (in series with the speaker)
+Resistor 1k 1% metal film,Yageo MFR-12 (Robu R203195),20,in use - breadboard ladder,v1a,Ladder only; pick 13 that measure closest
+Resistor 1k 5% carbon,,30,have,-,Not for the ladder
+Resistor 100k,5% carbon,several,have,v1a,Stylus pull-down
+Resistor 220 ohm,5% carbon,several,spare,-,Not needed: DAC jack has no room for series resistors
+Nickel strip,Pure Ni 8 x 0.15 mm (Quartz SLV-QC1013),1 m,have,v1a,Keys: cut 13 x 50 mm; salt-water test first (H2)
+FR4 copper clad,15 x 10 cm,2,spare,-,Superseded by nickel strip
+Silicone wire 26 AWG stranded,Robu 1825009,2 m,have,v1a,Stylus cable
+Silicone wire 24 AWG stranded,Black,1 m,have,v4,Flexing leads
+Solid wire 23-24 AWG,,few m,have,v4,Fixed wiring
+3.5 mm plug,,1,have,v4,Stylus plug (or splice an old aux cable)
+PJ311 3.5 mm jack,3-pin (no switch) (Robu 1883447),5,have,v4,Aux-in + stylus socket
+Brass stylus tip,Screw or rod,1,unknown (H7),v1a,File round and smooth
+Breadboard,MB-102 830 points,1,in use,v1,
+Dupont jumpers,20 cm M-M / M-F / F-F x40 each (Robu),120,in use,v1,Board headers are female: use M-M or M-F
+Alligator clips,,pack,in use,v1,
+Perfboard,7 x 9 cm + 2 x KS-44 dot board,3,have,v4,Ladder module + carrier
+Header pins,2.54 mm straight male + female,several,have,v4,
+Heat-set inserts,M3 x 8 x 4.2 brass,10,have,v4,Print hole 4.0 mm; FRDM mounting
+Screws + nuts,M3x6 x8 / M2x6 x8 / M2 nuts x8 / M2.5x6 x4,28,have,v4,
+Project boxes,5 small + 130 x 60,6,have,-,Parts storage
+Multimeter,MAS830L,1,in use,all,
+Soldering iron,Tomson 90 W digital (H5) / old 25 W kit,1-2,check H5,all,Temperature-controlled needed for nickel (~380 C)
+Soldering consumables,63/37 + 60/40 solder / flux / wick / pump / sponge / stand / heat-shrink,-,have,all,
+3D printer,,1,have,v4,
+Power bank,,1,have,all,

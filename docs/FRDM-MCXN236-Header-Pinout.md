@@ -1,7 +1,8 @@
 # FRDM-MCXN236 header pinout
 
 Generated from the board's own netlist (`pstxnet.dat`, SCH-90828 rev C) inside
-`FRDM-MCXN236-DESIGN-FILES.zip`. This is the design data itself, not a transcription,
+`FRDM-MCXN236-DESIGN-FILES.zip` (download from NXP's FRDM-MCXN236 page; not
+redistributed here). This is the design data itself, not a transcription,
 so it cannot disagree with the board.
 
 ## Finding pin 1 physically

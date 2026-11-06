@@ -97,6 +97,8 @@ It switches its outputs fully on and off ~250,000 times a second; the speaker's
 inertia and inductance average that into sound, so little energy is wasted as heat.
 Both speaker terminals are driven in opposite directions (*bridge-tied load*), giving 4×
 the power from 5 V. Neither terminal is ground, so wiring one to GND shorts an output.
+The same reason rules it out for headphones: a headphone jack joins left and right at one
+shared sleeve. Each output also sits at 2.5 V DC, which would flow through the earpieces.
 
 ## 15. Grounding
 Wires have resistance. Current through a shared ground wire creates a small voltage
@@ -112,3 +114,42 @@ and flags a touch when that time changes.
 Flash keeps data without power, but is erased in whole sectors and wears out after
 ~10,000+ writes: good for samples and presets. RAM is fast and loses everything at
 power-off: good for working data.
+
+## 18. Choosing a part
+Ask, in order: does it do the job → is it voltage-compatible (3.3 V logic here) → does it
+use an interface you have free (I2C / SPI / I2S / GPIO / ADC) → module or bare chip (a
+module = a chip plus its support parts on a breakout) → the cheapest one that passes.
+Read the datasheet, not the listing: the "OLED" bought first turned out to be a bare
+panel that needs its own PCB.
+
+## 19. Will it burn?
+Compute **I = V / R**, then **P = I² × R**, and compare P with the part's rating.
+Example: 10 Ω across 3.3 V draws 0.33 A and dissipates 1.1 W, which smokes a ¼ W resistor.
+The ladder: 0.25 mA through 1 kΩ is 0.06 mW per resistor, so it can't heat up at all.
+
+## 20. Tolerance: metal film vs carbon film
+Metal film is ±1 %, stable with temperature, and quiet. Carbon film is ±5 %, drifts with
+heat, and adds a little noise. Tolerance matters when exact values or *matching* matter
+(13 equal ladder steps); it doesn't when a resistor just has to be "roughly this big"
+(a 100 kΩ pull-down: anything from 47 kΩ to 220 kΩ works).
+
+## 21. Synth building blocks, in plain words
+- **Oscillator**: makes the raw tone. The waveform shape sets the character: *square* is
+  buzzy and hollow (the classic Stylophone sound), *saw* is bright, *triangle* is soft,
+  *sine* is pure.
+- **Sub-oscillator**: a second tone one octave lower, mixed in for weight.
+- **Envelope**: how a note starts and ends. *Attack* = fade-in time, *release* = fade-out
+  time after the stylus lifts. A few ms of each also removes clicks.
+- **Low-pass filter**: removes high frequencies, so the sound gets darker as the cutoff
+  goes down. *Resonance* boosts the frequencies right at the cutoff, making it sound "wah"-like.
+- **LFO and vibrato**: a slow wave (about 5–7 Hz) that nudges the pitch up and down.
+  Depth = how far it nudges.
+- **Echo**: the sound repeated after a delay, each repeat quieter. *Time* = gap between
+  repeats, *mix* = how loud the repeats are.
+
+## 22. The original Stylophone (our reference)
+1967, Dubreq. A metal (nickel-plated PCB) keyboard of about 20 keys spanning A to E,
+about 1.5 octaves, played by touching a brass-tipped stylus to it. One square-wave tone,
+a vibrato switch (~7 Hz wobble), a tuning knob underneath, a power switch, and a tiny
+speaker. The modern GEN X-1 adds a sub-oscillator, low-pass filter, envelope, LFO and
+delay; that's the feature set this build borrows.
