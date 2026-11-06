@@ -22,6 +22,7 @@ mcux_add_source(
             keys/keys.c
             i2c/i2c.c
             oled/oled.c
+            audio/audio.c
 )
 # Give up on a stuck I2C bus (bad wiring) instead of waiting forever.
 mcux_add_configuration(CC "-DI2C_RETRY_TIMES=10000U")
