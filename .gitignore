@@ -58,3 +58,10 @@ desktop.ini
 .DS_Store
 *.swp
 *~
+
+# --- Not ours to publish / machine-specific -----------------------------------
+# NXP board manuals and design files: download from NXP's FRDM-MCXN236 page.
+nxp-docs/
+# MCUXpresso files holding this machine's SDK/toolchain paths. Templates: README.md.
+firmware/mcux_include.json
+firmware/.vscode/mcuxpresso-tools.json
