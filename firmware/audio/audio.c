@@ -9,8 +9,8 @@
  *   512  (1/64)  → 0.22 V rms → ~6 mW    (soft)
  *   128  (1/256) → 0.06 V rms → ~0.4 mW  (cone moves, barely audible: a bare small
  *                                         speaker hardly radiates low notes)
- * The volume knob (v1d) will scale this. */
-#define LEVEL_MAX 512
+ * The volume knob (v1d) will scale this. 2048 is too loud for IEMs on the DAC jack. */
+#define LEVEL_MAX 2048
 #define RAMP      MAX(LEVEL_MAX / (AUDIO_RATE / 200), 1) /* full level in ~5 ms: no click */
 
 static int16_t sine[256];        /* one cycle of a sine wave */
