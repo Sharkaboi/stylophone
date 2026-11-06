@@ -48,7 +48,19 @@ reused with zero desoldering. Dropped: soundpad, record/loop, presets.
   - With the OLED on the same breadboard + rail as the ladder, top keys read ~2 % low (the
     jumper's voltage drop). Fix: separate `3V3`/`GND` jumpers for the ladder.
     Idle rose to ~95 (I2C bursts disturbing ground), still under 157.
-- **Next: v1c**, sound: strip the codec from `sai_interrupt`, sine wave → DAC → headphones.
+- **v1c ✅** `audio/`: SAI1 as I2S master at 32 kHz, 16-bit stereo.
+  - Clock: PLL1 = 24.576 MHz (FRO 48 MHz / 25 × 256 / 20), BCLK 1.024 MHz.
+  - Pins `P3_16`/`P3_17`/`P2_8`, pin function 10.
+  - The FIFO-request interrupt refills 2 frames, 16k times a second.
+  - Sine table with a phase-accumulator oscillator and a 5 ms fade in/out.
+  - Each key plays its equal-temperament pitch.
+  - Heard on the speaker (DAC Lout → PAM8403 → 8 Ω) at `LEVEL_MAX` 512 (1/64, ~6 mW).
+  - Breadboard power: top rails `3V3` (OLED); bottom rails `P5V0` (DAC VIN, amp), each
+    with its own `GND` jumper. DAC VIN reads 4.6 V.
+  - Debug lessons: a DAC fed from 3V3 was back-powered through its I2S pins (LEARNING #25).
+    A bare small speaker hardly radiates low notes (#26).
+  - Headphones/IEMs not tried yet: measure the level before they go near ears.
+- **Next: v1d**: octave buttons, RGB LED per note, volume + tuning knobs.
 - **Parts:** all on hand and header pins soldered. Status per part in
   `docs/MCXN236-Stylophone-BOM.csv`. Open checks H1–H8 are in `docs/DECISIONS.md`.
 
@@ -128,8 +140,8 @@ pins is the same signal, so either works. The Header column is for cross-checkin
 | Button sound | P3_18 | J1.9 | |
 | Button screen | P1_7 | J1.13 | |
 | Spare GPIO | P2_9 J1.15 · P4_6 J4.2 · P4_12 J4.10 · P4_13 J4.12 · P0_18 J4.5 · P4_21 J3.3 | | |
-| 5 V | J3.10 | | DAC VIN, PAM8403 |
-| 3.3 V | J3.4, J3.8, J4.1 | | ladder, knobs, OLED, SD, encoder |
+| 5 V (label `P5V0`) | J3.10 | | DAC VIN, PAM8403. Power row: –, 3V3, RESET, 3V3, **P5V0**, GND, GND, VIN |
+| 3.3 V (label `3V3`) | J3.4, J3.8, J4.1 | | ladder, knobs, OLED, SD, encoder |
 | GND | J2.14, J3.12, J3.14, J4.3 | | |
 
 Buttons and encoder: switch to GND, internal pull-up, no resistors.

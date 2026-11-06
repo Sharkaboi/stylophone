@@ -36,6 +36,12 @@ things work; this file is the how.
   (LEARNING #24).
 - OLED on the breadboard: its 4 pins in 4 columns (e.g. 50–53). GND → − rail, VDD → + rail
   (`3V3`), SCK → `P1_17`, SDA → `P1_16`.
+- **Two power rails**: top + = `3V3` (OLED), bottom + = `P5V0` (DAC VIN, amp VCC), marked
+  with tape. Each − rail gets its own jumper to a board `GND`. Before power-up, beep the
+  5 V rail against both − rails: no beep allowed. `P5V0` sits on the power row between
+  `3V3` and `GND`; `VIN` is an input, never a source.
+- Speaker with flush pads: quick test = jumper pins taped hard onto the pads. Proper = tin
+  pad and wire, join in 1–2 s (the coil wires underneath hate heat), then hot glue.
 - The FRDM's Arduino headers are female, so use M-M jumpers. Alligator clips hold pot lugs.
 
 ## Soldering

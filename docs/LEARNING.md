@@ -169,15 +169,6 @@ Back-to-back averaging made it worse, because the charge piles up between conver
   constant 100 kΩ × 100 nF = 10 ms is still fast enough for lifting the stylus.
 
 Rule: an ADC input wants a low-resistance source, or a capacitor right at the pin.
-
-## 24. Shared wires break "ratiometric"
-Ratiometric (entry 6) only works if the ladder's top really sits at the ADC reference
-voltage. Adding the OLED onto the same breadboard + rail jumper made its current (~20 mA)
-flow through that jumper and the rail's spring contacts, about 2 Ω together.
-V = I × R = 40 mV lost, so the top keys read ~2 % low (B4 went from 3747 to 3681).
-Rule: give a measurement circuit its own supply and ground wires, back to the source.
-Current from other parts then can't shift its voltage. This is the same idea as the
-star ground in entry 15.
 How it was found: change one variable at a time (reference, sample time, averaging) and
 watch the reading. Holding the stylus's bare metal swung it 0 ↔ 700 (mains hum through
 your body), while touching GND read 0.
@@ -188,3 +179,37 @@ about 1.5 octaves, played by touching a brass-tipped stylus to it. One square-wa
 a vibrato switch (~7 Hz wobble), a tuning knob underneath, a power switch, and a tiny
 speaker. The modern GEN X-1 adds a sub-oscillator, low-pass filter, envelope, LFO and
 delay; that's the feature set this build borrows.
+
+## 24. Shared wires break "ratiometric"
+Ratiometric (entry 6) only works if the ladder's top really sits at the ADC reference
+voltage. Adding the OLED onto the same breadboard + rail jumper made its current (~20 mA)
+flow through that jumper and the rail's spring contacts, about 2 Ω together.
+V = I × R = 40 mV lost, so the top keys read ~2 % low (B4 went from 3747 to 3681).
+Rule: give a measurement circuit its own supply and ground wires, back to the source.
+Current from other parts then can't shift its voltage. This is the same idea as the
+star ground in entry 15.
+
+## 25. Back-powering through signal pins
+Every chip input has tiny protection diodes to its own supply. If the chip has no proper
+supply, a high signal leaks through those diodes and half-powers it. The DAC was fed
+from the 3.3 V rail instead of 5 V:
+
+| Reading | Expected | Measured |
+|---|---|---|
+| DAC VIN | ~5 V | 2.88 V |
+| Bit clock (BCLK) | ~1.6 V | 0.48 V |
+| Word select (WSEL) | ~1.6 V | 1.26 V |
+
+The board's I2S lines were powering the DAC and sagged under the load. No sound, and the
+pins were strained.
+Rule: if signal lines read low and a module's supply reads oddly, suspect its power first.
+Power modules before (or with) their signal lines.
+Reading clocks with a DC meter: a square wave half the time at 3.3 V averages ~1.6 V.
+
+## 26. Why a bare small speaker is quiet on low notes
+When the cone pushes air forward it also pulls air from behind. With no box, the two flow
+round the edge and cancel (*acoustic short circuit*), worst at low frequencies, where the
+air has time to get round. At 0.4 mW the cone visibly moved at 262 Hz but was barely
+audible. Ears are also less sensitive at low frequencies. Fixes: a baffle or sealed box (the
+enclosure), more power, or higher notes.
+Power check: P = V² / R. 0.22 V rms into 8 Ω ≈ 6 mW, already a clear tone close up.
