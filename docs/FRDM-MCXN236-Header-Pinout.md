@@ -17,12 +17,31 @@ so it cannot disagree with the board.
 | **3.3V** (`VDD_BOARD`) | J3.4, J3.8, **J4.1** |
 | **5V** (`P5V0`) | J3.10 |
 | **GND** | **J2.14**, J3.12, J3.14, J4.3 |
-| **ADC, free** | **J2.1, J2.3, J2.5, J2.7** |
+| **ADC, free** | **J2.1, J2.3, J2.5, J2.7, J2.17** (ADC0_B21/B20/B19/B18/B16) |
 | ADC, NOT free | J2.11 - light sensor Q2 via R38 |
 | I2C (FC5) | J2.18 SDA, J2.20 SCL |
 | Do not use | J2.16 `VDDA_MCU`, J2.19 `VREFO` |
 
 `Also on` = other parts sharing the net. **Non-empty means the pin is not exclusively yours.**
+
+## What the "Also on" parts actually are (board BOM, rev C)
+
+Whether a shared pin is really shared depends on whether the linking part is fitted.
+
+| Part | Joins pin to | Fitted? | Effect |
+|---|---|---|---|
+| SJ1, SJ2, SJ3 (3-pad solder jumpers) | J2.6 / J2.8 / J1.3 | **1-2 shorted** | J2.6 = P1_3, J2.8 = P1_0, J1.3 = P2_0 |
+| R13, R14, R18 | P0_21, P0_24, P0_23 → accelerometer INT pins | **No (DNP)** | pins free |
+| R298, R299 (4.7 kΩ) | P4_13, P4_12 → 3.3 V | **No (DNP)** | pins free |
+| R55, R56 | P4_2, P4_3 → MCU-Link UART | **No (DNP)** | pins free |
+| R6, R7 (4.7 kΩ) | I2C SDA/SCL → 3.3 V | Yes | I2C pull-ups already on board |
+| R38 (0 Ω) | P0_25 → light sensor | Yes | J2.11 not usable as ADC |
+| R153–R156 (0 Ω) | P1_0–P1_3 → MCU-Link USB-SPI bridge | Yes | SPI shared with debugger |
+| R25, R67 (0 Ω) | P4_15, P4_16 → CAN transceiver | Yes | avoid J4.4, J4.6 |
+| R4, R5 (0 Ω) | P0_17, P0_16 → digital mic | Yes | avoid J4.7, J4.9 |
+| R106/R108/R109/R107 (0 Ω) | SAI1 pins → DA7212 codec | Yes, but codec not fitted | SAI pins free for our DAC |
+| U41 | P5_7 → USB-C controller | Yes | avoid J4.11 |
+| R37 (0 Ω) | P3_12 → QSPI flash | Yes | avoid J1.8, J3.15 |
 
 ## J1 - 16 pins (8 x 2)
 
@@ -30,7 +49,7 @@ so it cannot disagree with the board.
 |----:|--------|:--------:|---------|
 | 1 | `P3_16` | J15 | SJ2.3, J3.7, R106.1 |
 | 2 | `P4_3` | U1 | J5.3, R56.2 |
-| 3 | `N1499583` | - | SJ3.2 |
+| 3 | `P2_0` via SJ3 1-2 (pad 3 = P3_17) | H2 | SJ3.2 |
 | 4 | `P4_2` | T1 | J5.4, R55.2 |
 | 5 | `P2_8/SAI1_TXD0` | M2 | R109.1 |
 | 6 | `P2_0` | H2 | SJ3.1 |
@@ -54,9 +73,9 @@ so it cannot disagree with the board.
 | 3 | `P0_28/ADC0_B20-MC_BEMF_B` | E8 |  |
 | 4 | `P3_14` | H17 | J3.11 |
 | 5 | `P0_27/ADC0_B19-MC_BEMF_C` | E10 |  |
-| 6 | `N1499275` | - | SJ1.2 |
+| 6 | `P1_3/FC3_P3` (SPI CS) via SJ1 1-2 (pad 3 = P3_15) | - | SJ1.2, R155 |
 | 7 | `P0_26/ADC0_B18-MC_VOLT_DCB` | F10 |  |
-| 8 | `N1499293` | - | SJ2.2 |
+| 8 | `P1_0/FC3_P0` (SPI MOSI) via SJ2 1-2 (pad 3 = P3_16) | - | SJ2.2, R156 |
 | 9 | `P0_22` | B8 | J1.16 |
 | 10 | `P1_2` | C4 | J7.5, R154.1, J6.5 |
 | 11 | `P0_25/ADC0_B17-LIGHT_SENSOR` | A6 | R38.2 |

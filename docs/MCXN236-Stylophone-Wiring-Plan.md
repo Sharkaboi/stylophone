@@ -2,9 +2,9 @@
 
 Complete electrical plan for the 13-key sample stylophone/soundpad. Four
 subsystems: power/grounding, keyboard ladder, audio chain, controls/display.
-Pair this with the BOM. Assign the concrete board pads in **MCUXpresso Config
-Tools** (`frdmmcxn236`) — each peripheral function is only available on certain
-pads, so the names below are the logical plan, not fixed pin numbers.
+Pair this with the BOM. Concrete pins (verified against the board netlist and
+BOM) are in the **Pin map** table in `CLAUDE.md`. Open choices marked *(Dn)* are in
+`docs/DECISIONS.md`.
 
 ---
 
@@ -40,7 +40,8 @@ reuse the SWD/debug or ISP/reset/wake pins.
 **Grounding — star topology.** Run these ground groups back to one common star
 point rather than daisy-chaining:
 - Analog/audio ground: DAC AGND, the 220 Ω / aux mix returns, jack sleeve.
-- Amp/speaker ground: PAM8403 GND + speaker return (this is the noisy, high-current one).
+- Amp ground: PAM8403 GND (the noisy, high-current one). The speaker's own two
+  wires go only to the amp outputs, never to ground (see Amp → speaker).
 - Digital ground: MCU GND, SD, I²C devices, logic.
 Keep the amp/speaker ground path separate from the DAC's analog ground until the
 star — that's what stops speaker current injecting hiss into the line-out.
@@ -76,7 +77,9 @@ spaced voltages ~0.25 V apart.
 | 1 | C4 | 0.25 | ~315 |
 | — | none | 0 | ~0 |
 
-Bands sit ~315 counts apart — hugely reliable. Firmware maps each band to a note;
+These are the ideal values with the ADC referenced to the same 3.3 V. The current
+firmware table sags up to ~11 % mid-ladder (see Status in `CLAUDE.md`) and is
+re-measured after the ADC fixes. Bands sit ~315 counts apart — hugely reliable. Firmware maps each band to a note;
 transpose/octave just shift the mapping.
 
 **Pins:** 3.3 V, GND, 1 ADC channel.
@@ -90,20 +93,27 @@ DAC **VIN → 5 V** (board accepts 3–5 V), **GND**, **AGND** for the analog re
 Leave the config header (SCLK, MUTE, PLL, SF0, SF1, DEEM) unconnected — on-board
 defaults give standard I²S, un-muted. `3V0` is a regulator *output* — don't feed it.
 
-**Line out → headphone jack (auto-mute).**
-- DAC **Lout → 220 Ω → PJ311 tip**; **Rout → 220 Ω → PJ311 ring**; **AGND → sleeve**.
-  (220 Ω tames level and protects IEMs.)
-- The PJ311 has a normally-closed **switch contact** on the tip. Route the DAC
-  signal to the amp *through* that contact: no plug → contact closed → amp fed →
-  speaker plays; plug inserted → contact opens → amp cut → **speaker auto-mutes**,
-  headphones play. (Confirm the switch pin with the multimeter: with no plug, tip
-  and tip-switch beep together; inserting a plug breaks the beep.)
+**Line out → headphones** *(D16)*.
+- Start with the DAC module's own 3.5 mm jack, no extra parts. The UDA1334A is a
+  *line* output (meant for ≥ 10 kΩ loads); 16–32 Ω headphones may be quiet. Test at v1c.
+- The 220 Ω series resistors in the BOM cut level ~8× with 32 Ω headphones. Add them
+  only if the output is too loud for IEMs.
+- Panel jack option: DAC **Lout → PJ311 tip**, **Rout → ring**, **AGND → sleeve**.
+
+**Speaker mute** *(D15, D17)*.
+- Default: the SPDT toggle in the PAM8403's 5 V feed = speaker on/off.
+- Auto-mute only if a jack has a normally-closed **switch contact** (5-pin PJ311 —
+  check pin count, P3): route the amp's input through that contact, so inserting a
+  plug opens it and cuts the speaker. Confirm with the multimeter: no plug → tip and
+  switch pin beep; plug in → beep stops.
 
 **Amp → speaker.**
 - PAM8403 **VCC → 5 V**, **GND → (amp) star ground**. One channel used (mono speaker).
 - Amp input ← the switched line node. Add a **10 kΩ pulldown** from amp input to
   ground so it sits quiet while muted (no buzz/pop).
-- Amp output → **speaker (8 Ω)**.
+- Amp **OUT+ and OUT− → speaker (8 Ω)**. The PAM8403 is bridge-tied: both outputs
+  swing in opposite directions, so neither is ground. Wiring either one to GND
+  shorts the amp.
 
 **Aux-in (optional, v4).** Aux jack tip/ring → **10 kΩ each** into the line node
 (passive sum), sleeve → ground. External audio then plays through speaker and
@@ -192,4 +202,4 @@ headers), 3D-printed shell, star grounding. Copper-clad key face cut and mounted
 | BCLK, WSEL, DIN | I²S | DAC |
 | GPIO ×9 | digital | encoder ×3, buttons ×5, toggle ×1 |
 
-Assign the concrete pads in MCUXpresso Config Tools before wiring the permanent build.
+Concrete pins: see the **Pin map** in `CLAUDE.md`.
