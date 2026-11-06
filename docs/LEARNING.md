@@ -169,6 +169,15 @@ Back-to-back averaging made it worse, because the charge piles up between conver
   constant 100 kΩ × 100 nF = 10 ms is still fast enough for lifting the stylus.
 
 Rule: an ADC input wants a low-resistance source, or a capacitor right at the pin.
+
+## 24. Shared wires break "ratiometric"
+Ratiometric (entry 6) only works if the ladder's top really sits at the ADC reference
+voltage. Adding the OLED onto the same breadboard + rail jumper made its current (~20 mA)
+flow through that jumper and the rail's spring contacts, about 2 Ω together.
+V = I × R = 40 mV lost, so the top keys read ~2 % low (B4 went from 3747 to 3681).
+Rule: give a measurement circuit its own supply and ground wires, back to the source.
+Current from other parts then can't shift its voltage. This is the same idea as the
+star ground in entry 15.
 How it was found: change one variable at a time (reference, sample time, averaging) and
 watch the reading. Holding the stylus's bare metal swung it 0 ↔ 700 (mains hum through
 your body), while touching GND read 0.

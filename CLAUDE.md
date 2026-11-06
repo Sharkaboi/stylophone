@@ -42,6 +42,13 @@ reused with zero desoldering. Dropped: soundpad, record/loop, presets.
   - Holding the stylus's bare metal injects mains hum (0–700): fingers off the tip. A
     100 nF capacitor at the input is planned.
   - Command-line flashing fails while a VS Code debug session is attached.
+- **v1b ✅** `i2c/` (FC5 on `P1_16`/`P1_17`, 400 kHz, bus scan at boot) + `oled/` (SSD1306
+  driver, 1 KB frame buffer, unscii 8×8 font, text at any scale). The screen shows the
+  title, the note at 3× size, and the ADC value. The scan finds 0x3c; all 13 notes show in order.
+  - With the OLED on the same breadboard + rail as the ladder, top keys read ~2 % low (the
+    jumper's voltage drop). Fix: separate `3V3`/`GND` jumpers for the ladder.
+    Idle rose to ~95 (I2C bursts disturbing ground), still under 157.
+- **Next: v1c**, sound: strip the codec from `sai_interrupt`, sine wave → DAC → headphones.
 - **Parts:** all on hand and header pins soldered. Status per part in
   `docs/MCXN236-Stylophone-BOM.csv`. Open checks H1–H8 are in `docs/DECISIONS.md`.
 

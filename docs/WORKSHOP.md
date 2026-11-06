@@ -31,6 +31,11 @@ things work; this file is the how.
   into the − rail; the "stylus" jumper in row e.
 - Every ground must be one connected node. A part wired to an unconnected rail does
   nothing.
+- Give the ladder its **own** jumpers to the board's `3V3` and `GND` pins. Other modules
+  (the OLED) take their power from the rails. Sharing one jumper shifts the key readings
+  (LEARNING #24).
+- OLED on the breadboard: its 4 pins in 4 columns (e.g. 50–53). GND → − rail, VDD → + rail
+  (`3V3`), SCK → `P1_17`, SDA → `P1_16`.
 - The FRDM's Arduino headers are female, so use M-M jumpers. Alligator clips hold pot lugs.
 
 ## Soldering
