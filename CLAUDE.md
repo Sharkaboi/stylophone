@@ -164,12 +164,18 @@ Buttons and encoder: switch to GND, internal pull-up, no resistors.
 - Volume is software (knob → ADC → scale).
 
 ## Build order (each stage tested before the next)
-- v0 ✅
-- **v1a** ladder → ADC → note (re-test with fixes)
-- v1b OLED: I2C scan, text, note name
-- v1c sound: strip the codec from `sai_interrupt`, sine to headphones
-- v1d instrument: keys play notes; octave buttons, RGB LED, volume and tuning knobs.
-  Milestone: playable.
+- v0 ✅ · v1a ✅ ladder → ADC → note · v1b ✅ OLED · v1c ✅ sound to speaker
+- **Next session: de-clutter by soldering only what is final.**
+  1. Ladder module on perfboard: 13 resistors, 14-pin header (WORKSHOP).
+  2. Speaker leads (half-jumpers, hot glue).
+  3. Half-jumper leads on the 4 pots, 5 buttons, encoder and toggle. They plug straight
+     onto the board, no breadboard.
+  4. Colour code: red = 5 V, orange = 3V3, black = GND; short jumpers.
+
+  Keep the breadboard only for the power rails and the stylus node. Solder the DAC + amp
+  audio board after the 100 nF + 47–100 µF capacitors arrive. Build the main carrier
+  perfboard (sockets for the FRDM and modules) only after v2/v3, once every signal is known.
+- v1d instrument: octave buttons, RGB LED, volume and tuning knobs. Milestone: playable.
 - v2 synth: waveforms, sub-oscillator, envelope, filter, vibrato, echo, encoder menu
 - v3 microSD samples (FatFs + SPI driver) and GIF screensaver
 - v4 build: nickel key plate, ladder module, carrier perfboard, speaker stage,
