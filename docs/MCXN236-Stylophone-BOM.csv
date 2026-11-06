@@ -35,6 +35,7 @@ Project boxes,5 small + 130 x 60,6,have,-,Parts storage
 Multimeter,MAS830L,1,in use,all,
 Soldering iron,Old 25 W kit iron,1,working,all,Works after tip cleaning; may struggle on nickel keys (~380 C)
 Power switch,USB inline on/off cable or slide switch,1,missing,v4,Switch the 5 V wire only (D22)
+Ceramic capacitors 100 nF,"0.1 uF, 104, 50 V, through-hole",10,missing,v4,One at the stylus input (P0_29 to GND); spares for supply decoupling in any project
 Soldering consumables,63/37 + 60/40 solder / flux / wick / pump / sponge / stand / heat-shrink,-,have,all,
 3D printer,,1,have,v4,
 Power bank,,1,have,all,

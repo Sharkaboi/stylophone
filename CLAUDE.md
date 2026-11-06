@@ -13,6 +13,8 @@ Concepts: `docs/LEARNING.md`. Hands-on technique: `docs/WORKSHOP.md`.
   run it first, then dissect it; park deep questions; work in ~1 h steps. I'm a
   perfectionist, so keep me moving.
 - **Don't guess.** Check the board docs, netlist and parts list before stating anything.
+- **Name board pins by their silkscreen label** (`P0_29`, `3V3`, `GND`, `5V`), never by
+  header number (`J2.1`); the header numbers aren't printed on the board.
 - **Least code:** fewest lines, reading like pseudocode. One folder per feature.
 - **Docs:** minimal, bullet points, technical English, no padding.
 - **Incremental commits:** one working, tested step per commit. No Claude/AI attribution.
@@ -31,16 +33,15 @@ reused with zero desoldering. Dropped: soundpad, record/loop, presets.
 
 ## Status
 - **v0 ✅** Toolchain works; hello_world builds, flashes, prints on **COM3 @ 115200**.
-- **v1a code ✅, needs re-test.** `firmware/hello_world.c` reads the ladder on J2.1 and
-  prints the note.
-  - On the breadboard ladder, the multimeter read ideal taps: 3.30, 3.04 … 0.25 V.
-  - The ADC read 4095, 3714, … 315, sagging up to ~11 % in the middle. So the resistors
-    are fine, and the sag is on the ADC side.
-  - Fixes to try:
-    1. Reference `kLPADC_ReferenceVoltageAlt3` (internal VREF) → `Alt1` (VREFH = 3.3 V
-       analog supply, so readings are ratiometric).
-    2. A longer `sampleTimeMode` (default 3 clocks is short for a source of up to 3.25 kΩ).
-    3. Confirm the 100 kΩ pull-down value. Then re-measure.
+- **v1a ✅** `firmware/main.c` + `adc/` + `keys/`: the ladder on `P0_29` → key → serial,
+  printed 4×/s (`note  adc N  expect M`).
+  - ADC settings: reference VREFH (`Alt1`), 131-clock sample window, one conversion per
+    read, no averaging.
+  - Measured: keys within −4 … −76 counts of k × 315 (the 100 kΩ load, worst mid-ladder);
+    no key ≈ 60. Decode = nearest step, `(adc + 157) / 315`.
+  - Holding the stylus's bare metal injects mains hum (0–700): fingers off the tip. A
+    100 nF capacitor at the input is planned.
+  - Command-line flashing fails while a VS Code debug session is attached.
 - **Parts:** all on hand and header pins soldered. Status per part in
   `docs/MCXN236-Stylophone-BOM.csv`. Open checks H1–H8 are in `docs/DECISIONS.md`.
 
@@ -53,6 +54,14 @@ reused with zero desoldering. Dropped: soundpad, record/loop, presets.
   CMake ≥ 3.30; one complete installer toolchain (don't mix a manual one).
 - Machine-local, git-ignored: `firmware/mcux_include.json`,
   `firmware/.vscode/mcuxpresso-tools.json`. README shows how to recreate them.
+- Command-line build (Git Bash). Put the installer's CMake 3.30 first: `Z:\CMake` is an
+  old 3.28 that breaks reconfigures.
+  ```
+  cd firmware
+  export PATH="$HOME/.mcuxpressotools/ninja-1.13.2:$HOME/.mcuxpressotools/cmake-3.30.0-windows-x86_64/bin:$PATH"
+  cmake --preset debug && cmake --build debug        # → debug/firmware.elf
+  /c/NXP/LinkServer_26.6.137/LinkServer.exe flash MCXN236:FRDM-MCXN236 load debug/firmware.elf
+  ```
 - Flash + serial via **J10 (MCU-Link USB-C)**. JP6 open = serial on.
 - Boot prints: open the serial monitor, then press **SW1 (reset)**.
 - Debugging = `PRINTF` to COM3.
@@ -85,6 +94,8 @@ reused with zero desoldering. Dropped: soundpad, record/loop, presets.
   Per-pin detail: `docs/FRDM-MCXN236-Header-Pinout.md`.
 
 ## Pin map (verified against netlist + BOM)
+Use the "MCU pin" name: it's what the underside silkscreen shows. A label printed on two
+pins is the same signal, so either works. The Header column is for cross-checking docs.
 | Function | MCU pin | Header | Notes |
 |---|---|---|---|
 | Stylus (key ladder) | P0_29 = ADC0_B21 | J2.1 | 100 kΩ pull-down to GND |

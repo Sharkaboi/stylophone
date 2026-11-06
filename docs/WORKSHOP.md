@@ -23,8 +23,14 @@ things work; this file is the how.
 - The long edge rails (red +, blue −) run the full length.
 - Each short column of 5 holes in the middle is connected; the centre trench separates
   the two halves.
-- Ladder layout: R1 in columns 1–2, R2 in 2–3 … R13 in 13–14. Column 1 → 3.3 V
-  (= K13), column 14 → GND. Columns 1–13 are the 13 key taps.
+- Ladder layout (top half): resistors lie flat, 3 columns each. Odd-numbered ones go in
+  row a, even-numbered ones in row b: R1 cols 1→4, R2 4→7 … R13 37→40.
+  - Col 1 → − rail (GND); col 40 → + rail (`3V3`).
+  - Key k = column 1 + 3k, touched at row e.
+- Stylus node (top half, col 45): `P0_29` jumper in row c; 100 kΩ from row a straight
+  into the − rail; the "stylus" jumper in row e.
+- Every ground must be one connected node. A part wired to an unconnected rail does
+  nothing.
 - The FRDM's Arduino headers are female, so use M-M jumpers. Alligator clips hold pot lugs.
 
 ## Soldering

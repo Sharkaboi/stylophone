@@ -48,6 +48,8 @@ Reading the evidence: a wrong reference shifts every key by the *same factor*.
 v1a's keys are right at both ends and low only in the middle. That shape follows the
 source resistance from entry 4, which is a loading or settling problem, not a reference
 problem. Matching the *shape* of an error to a cause is the core debugging skill.
+How it resolved: a longer sample time cut the mid-ladder sag from 11 % to 3 %. The 3 %
+left is exactly the 100 kΩ loading from entry 4: predicted 2136 at K7, measured 2137.
 
 ## 7. Bounce and debouncing
 Metal contacts bounce, making and breaking dozens of times over 1–10 ms, and a stylus
@@ -147,7 +149,31 @@ heat, and adds a little noise. Tolerance matters when exact values or *matching*
 - **Echo**: the sound repeated after a delay, each repeat quieter. *Time* = gap between
   repeats, *mix* = how loud the repeats are.
 
-## 22. The original Stylophone (our reference)
+## 22. ADC kickback on a high-resistance input
+At the start of every conversion, the ADC connects its sampling capacitor to the pin and
+dumps a little charge onto it. A low-resistance source (a ladder key, ≤ 3.25 kΩ) absorbs
+that instantly. With no key touched, only the 100 kΩ pull-down drains it, which takes
+microseconds, so the pin reads a false voltage. Measured on `P0_29` with nothing touched:
+
+| Sample window | Reading |
+|---|---|
+| 3 clocks | ~175 |
+| 35 clocks | ~135 |
+| 67 clocks | ~105 |
+| 131 clocks | ~60 |
+
+Back-to-back averaging made it worse, because the charge piles up between conversions.
+- **Firmware fix:** the longest sample window, one conversion per read.
+- **Hardware fix:** a 100 nF capacitor from the pin to GND. It acts as a charge reservoir
+  (5 pF dumped into 100 nF changes nothing) and also filters mains hum. The time
+  constant 100 kΩ × 100 nF = 10 ms is still fast enough for lifting the stylus.
+
+Rule: an ADC input wants a low-resistance source, or a capacitor right at the pin.
+How it was found: change one variable at a time (reference, sample time, averaging) and
+watch the reading. Holding the stylus's bare metal swung it 0 ↔ 700 (mains hum through
+your body), while touching GND read 0.
+
+## 23. The original Stylophone (our reference)
 1967, Dubreq. A metal (nickel-plated PCB) keyboard of about 20 keys spanning A to E,
 about 1.5 octaves, played by touching a brass-tipped stylus to it. One square-wave tone,
 a vibrato switch (~7 Hz wobble), a tuning knob underneath, a power switch, and a tiny
