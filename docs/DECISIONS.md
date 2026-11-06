@@ -128,15 +128,20 @@ nickel strip already comes at key width (8 mm), so no paper template is needed: 
 (machine paths). The README documents how to recreate them.
 **D21** Rewrite history without the Claude co-author line, and force-push.
 
-## Needs your hands
+**D22 Power switch: add one.** Without it, the gadget turns on whenever the power bank is
+plugged in. It switches only the USB 5 V wire, never GND or data. Easiest: a USB cable
+with an inline on/off switch (no soldering). Otherwise a small slide switch on a USB
+breakout. Anything rated ≥ 0.5 A works; the build draws ~0.2 A.
 
-| # | Check | How |
+## Hardware checks (answered)
+
+| # | Check | Answer |
 |---|---|---|
-| H1 | Old PAM8403 alive? | Unpowered, Ω between its 5 V and GND pins: ~0 Ω and staying there = dead; starting low and climbing = fine (capacitors charging) |
-| H2 | Nickel strip really nickel? | Cut a piece, leave the fresh edge in salt water overnight: rust = steel core, return it |
-| H3 | FRDM mounting holes | Test-fit an M3 screw (likely 3.2 mm holes) |
-| H4 | New OLED pin order | Read the silkscreen before wiring: `VCC GND SCL SDA` or `GND VCC SCL SDA` |
-| H5 | Soldering iron | Was the Tomson 90 W digital bought? The old 25 W kit iron can't do the nickel keys |
-| H6 | ADC table conditions | Was the 100 kΩ pull-down in place when the 13 ADC values were recorded? |
-| H7 | Stylus tip | Do you have the brass screw/rod yet? |
-| H8 | Power switch | None planned: power = power bank button or unplug. OK? |
+| H1 | Spare PAM8403s | Several on hand; ignore the possibly dead one |
+| H2 | Nickel strip | Not salt-tested; no rust so far. Test before the final key plate |
+| H3 | FRDM mounting | Board BOM lists 4 unplated 3.2 mm holes (BH1–BH4, M3), probably under the rubber feet. Peel one to confirm; otherwise use a printed cradle |
+| H4 | OLED pins | 1–4 = **GND, VDD, SCK, SDA** (GND first) |
+| H5 | Iron | Old 25 W iron works after cleaning the tip oxide and reseating it |
+| H6 | ADC table | The 100 kΩ pull-down was fitted on the breadboard when it was recorded |
+| H7 | Stylus | Temporary: any bare metal (3.5 mm plug tip, screwdriver bit). Continuity-test it to the wire |
+| H8 | Power switch | See D22 |

@@ -77,7 +77,9 @@ reused with zero desoldering. Dropped: soundpad, record/loop, presets.
   - P0_16/P0_17 (microphone)
   - P5_7 (USB-C controller)
   - P3_12 (QSPI flash)
-- No USB-PD chip: USB-C always delivers 5 V. Power only through USB-C.
+- No USB-PD chip: USB-C always delivers 5 V. Power only through USB-C, through an inline
+  on/off switch on the 5 V wire.
+- Mounting: 4 unplated 3.2 mm holes (BH1–BH4, M3), probably under the rubber feet.
 - Source of truth: the FRDM-MCXN236 design files (netlist + BOM) and UM12041 from
   nxp.com/design/design-center/development-boards-and-designs/FRDM-MCXN236.
   Per-pin detail: `docs/FRDM-MCXN236-Header-Pinout.md`.
@@ -93,7 +95,7 @@ reused with zero desoldering. Dropped: soundpad, record/loop, presets.
 | I2S bit clock → DAC BCLK | P3_16 = SAI1_TX_BCLK | J1.1 | |
 | I2S word select → DAC WSEL | P3_17 = SAI1_TX_FS | J1.11 | |
 | I2S data → DAC DIN | P2_8 = SAI1_TXD0 | J1.5 | MCLK unused |
-| I2C SDA (OLED 0x3C) | P1_16 = FC5 | J2.18 | |
+| I2C SDA (OLED 0x3C) | P1_16 = FC5 | J2.18 | OLED pins: GND, VDD, SCK, SDA |
 | I2C SCL | P1_17 = FC5 | J2.20 | |
 | SPI MOSI (SD) | P1_0 = FC3_P0 | J2.8 | |
 | SPI SCK | P1_1 = FC3_P1 | J2.12 | |
