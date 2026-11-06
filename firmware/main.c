@@ -47,18 +47,17 @@ int main(void)
     }
 
     int shown = -1;
-    for (int tick = 0;; tick++)
+    while (1)
     {
         uint16_t adc;
         int key = keys_read(&adc);
 
+        /* Only on a change: every screen update is a 1 KB I2C burst, whose current pulses
+         * leak into the audio through the shared ground (heard as crackle). */
         if (key != shown)
         {
-            audio_note(key_hz(key));
-        }
-        if (key != shown || tick % 25 == 0) /* a new note at once; the raw value 4x a second */
-        {
             shown = key;
+            audio_note(key_hz(key));
             draw(key, adc);
         }
         SDK_DelayAtLeastUs(10000U, SystemCoreClock); /* read 100 times a second */
