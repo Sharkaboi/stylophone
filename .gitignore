@@ -1,9 +1,38 @@
-# Repo-wide ignores.
-# Firmware build output (debug/, release/, the __repo__ SDK junction, CMake and
-# C artifacts) is handled by firmware/.gitignore, next to the project it covers.
+# One ignore file for the whole repo. Public repo rule: commit sources + docs only.
+# Never: build output, SDK copies, machine-local files, anything private.
 
-# Safety net: firmware images anywhere outside firmware/.
-# If you ever need to commit one, un-ignore it explicitly, e.g. !samples/kit.bin
+# --- MCUXpresso SDK -----------------------------------------------------------
+# Every MCUXpresso project contains __repo__, a Windows junction to the SDK
+# (z:\frdm_mcxn236\frdm_mcxn236). Git walks junctions like normal folders and
+# would swallow ~64,000 files / 1.3 GB, so ignore it at any depth.
+__repo__/
+
+# SDK examples imported at the repo root for reference (frdmmcxn236_<name>/).
+# Re-import any time from the SDK; copy the parts we need into firmware/.
+/frdmmcxn236_*/
+
+# Register description the MCUXpresso extension regenerates (15 MB).
+firmware/svd/
+
+# --- Build output ---------------------------------------------------------------
+# CMakePresets.json builds into <project>/debug and <project>/release.
+debug/
+release/
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CMakeUserPresets.json
+
+# Compiler output.
+*.o
+*.obj
+*.d
+*.a
+*.su
+
+# Firmware images. If one must ever be published, un-ignore it explicitly.
 *.elf
 *.axf
 *.bin
@@ -11,12 +40,21 @@
 *.srec
 *.s19
 *.map
+*.lst
 
-# OS noise
+# --- Python PC-side tools (tools/) ----------------------------------------------
+__pycache__/
+*.pyc
+.venv/
+
+# --- Private: never published ---------------------------------------------------
+# Chat exports, personal notes, anything with names/addresses/keys.
+private/
+.env
+
+# --- OS / editor noise -----------------------------------------------------------
 Thumbs.db
 desktop.ini
 .DS_Store
-
-# Editor noise
 *.swp
 *~
