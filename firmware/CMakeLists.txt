@@ -17,7 +17,9 @@ include(${SdkRootDirPath}/CMakeLists.txt)
 include(${board}/board_files.cmake)
 
 mcux_add_source(
-    SOURCES hello_world.c
+    SOURCES main.c
+            adc/adc.c
+            keys/keys.c
 )
 mcux_convert_binary(BINARY ${APPLICATION_BINARY_DIR}/${MCUX_SDK_PROJECT_NAME}.bin)
 mcux_add_config_mex_path( PATH ${board} )
